@@ -7,7 +7,7 @@ public class Individual {
     public static final double A = 20;
     public static final double B = 0.2;
     public static final double C = 2 * Math.PI;
-    static final double MIN_SIGMA = 0.003;
+    double minSigma = 0.003;
 
     int number;
     List<AckleyX> representation;
@@ -16,7 +16,8 @@ public class Individual {
     double cordinateTau;
     double fitness = 0;
 
-    Individual(int number){
+    Individual(int number, double minSigma){
+        this.minSigma = minSigma;
         representation = new ArrayList<>();
         this.number = number;
         overallTau = 1 / Math.pow(2 * number, 0.5);
@@ -33,7 +34,8 @@ public class Individual {
     }
 
     Individual(Individual src){
-        this.number = src.number;
+        number = src.number;
+        minSigma = src.minSigma;
         overallTau = src.overallTau;
         cordinateTau = src.cordinateTau;
         representation = new ArrayList<>();
@@ -52,8 +54,8 @@ public class Individual {
                     UsefulUtils.getGaussian(0, src.overallTau) +
                     UsefulUtils.getGaussian(0, src.cordinateTau)
             );
-            if(child.representation.get(i).step < MIN_SIGMA)
-                child.representation.get(i).step = MIN_SIGMA;
+            if(child.representation.get(i).step < child.minSigma)
+                child.representation.get(i).step = child.minSigma;
             child.representation.get(i).value = child.representation.get(i).value +
                     UsefulUtils.getGaussian(0, child.representation.get(i).step);
         }

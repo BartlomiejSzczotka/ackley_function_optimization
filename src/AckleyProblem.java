@@ -1,26 +1,20 @@
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 public class AckleyProblem {
-    private int populationSize = 150;
-    private int maxGenerationNumber = 2000;
+    private ESConfigs esConfigs = ESConfigs.getInstance();
     private int generationNumber = 0;
-    private int childrenSize = 7 * populationSize;
     List<Individual> population;
     List<Individual> children;
     Individual globalMinIndividual;
     double minChildValue = Double.MAX_VALUE;
     double maxChildValue = Double.MIN_VALUE;
-    int numDim = 0;
-
-    AckleyProblem(int numDim){
-        this.numDim = numDim;
-    }
 
     public void solve() {
         generatePopulation();
-        while(maxGenerationNumber > generationNumber){
+        while(esConfigs.maxGenerationNumber > generationNumber){
             generateChildren();
             preparingCompetitors();
             chooseSurvivors();
@@ -38,9 +32,9 @@ public class AckleyProblem {
         population = new ArrayList<>();
         globalMinIndividual = null;
 
-        for(int i=0; populationSize>i; i++){
-            Individual individual = new Individual(numDim);
-            individual.value = Individual.getValue(individual.representation, numDim);
+        for(int i=0; esConfigs.populationSize>i; i++){
+            Individual individual = new Individual(esConfigs.numDim, esConfigs.minSigma);
+            individual.value = Individual.getValue(individual.representation, esConfigs.numDim);
             if(globalMinIndividual == null || globalMinIndividual.value > individual.value)
                 setNewMinimumIndividual(individual);
             population.add(individual);
@@ -52,10 +46,10 @@ public class AckleyProblem {
         minChildValue = Double.MAX_VALUE;
         maxChildValue = Double.MIN_VALUE;
         Random random = new Random();
-        for(int i=0; childrenSize>i; i++){
+        for(int i=0; esConfigs.childrenSize>i; i++){
             int randIndex = random.nextInt(population.size());
             Individual individual = Individual.mutation(population.get(randIndex));
-            individual.value = Individual.getValue(individual.representation, numDim);
+            individual.value = Individual.getValue(individual.representation, esConfigs.numDim);
             if(globalMinIndividual == null || globalMinIndividual.value > individual.value)
                 setNewMinimumIndividual(individual);
             if(individual.value < minChildValue) minChildValue = individual.value;
@@ -65,12 +59,14 @@ public class AckleyProblem {
     }
 
     public void setNewMinimumIndividual(Individual individual){
+        DecimalFormat df = new DecimalFormat();
+        df.setMaximumFractionDigits(6);
         globalMinIndividual = individual;
 
         System.out.println(
             "GN: " + generationNumber +
-                " | Optimum Individual: " + globalMinIndividual.toString()
-                + ", " + globalMinIndividual.value
+                " | " + globalMinIndividual.toString()
+                + ", " + df.format(globalMinIndividual.value)
         );
     }
 
@@ -99,7 +95,7 @@ public class AckleyProblem {
         Random random = new Random();
         population = new ArrayList<>();
 
-        while(populationSize > population.size()){
+        while(esConfigs.populationSize > population.size()){
             double randDouble = random.nextDouble();
             double fitPointer = 0;
 
